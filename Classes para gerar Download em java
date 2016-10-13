@@ -1,3 +1,43 @@
+public String downloadLogTxt(TxtEnviado txtEnviado){
+    logTxtList = logTxtService.findLogByFiltro(txtEnviado);
+
+    try {
+        if(logTxtList.size()>0){
+            File file = writeFile(logTxtList);
+            DownloadFileHandler.downloadFile(file, "text/plain");
+            file.delete();
+        }else{
+            addErrorMessage("Arquivo não gerou log.");
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+		
+    return "gotoDownload";
+}
+
+public File writeFile(List<LogTxt> logTxtList) throws IOException{
+    String caminho = System.getProperty("jboss.server.log.dir")+java.io.File.separator;
+    File file = new File(caminho+"LOG_"+logTxtList.get(0).getTxtEnviado().getArquivo());
+
+    BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+
+    for (LogTxt logTxt : logTxtList) {
+        writer.write("Data: ");
+        writer.write(logTxt.getData());
+        writer.write("; Nome: ");
+        writer.write(logTxt.getNome());
+        writer.write("; Descrição: ");
+        writer.write(logTxt.getDescricao());
+        writer.newLine();	
+    }
+    writer.flush();
+    writer.close();
+    return file;
+}
+
+
+
 public class DownloadFileHandler {
 
     /**
